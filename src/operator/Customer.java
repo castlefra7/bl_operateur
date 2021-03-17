@@ -83,7 +83,6 @@ public class Customer {
                     throw new Exception("La limite d'achat du forfait " + offer.getName() + " est atteinte");
             }
         }
-        
         account.getPurchases().add(new Purchase(id, offer, newPurchaseDate));
     }
     
@@ -91,5 +90,6 @@ public class Customer {
         if (!app.equals(consumed.getApplication()))
                 throw new Exception("Application and consumption does not match");
         
+        account.getConsumptions().add(new Consumption(1, id, app, consumptionDate, consumed));
     }
 }

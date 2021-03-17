@@ -102,14 +102,6 @@ public class Offer {
                 amountMap.put(this.amounts.get(i).getApplication().getName(), newAmount);
             }
         }
-//        for (int i = 0; i < offer.getAmounts().size(); i++ ) {
-//            if (!amountMap.containsKey(offer.getAmounts().get(i).getApplication().getName())) {
-//                Amount newAmount = new Amount(offer.getAmounts().get(i));
-//                newAmount.setValue(0);
-//                amountMap.put(offer.getAmounts().get(i).getApplication().getName(), newAmount);
-//            }
-//        }
-        
         for (int i = 0; i < this.amounts.size(); i++ ) {
             String key = this.amounts.get(i).getApplication().getName();
             Amount amount = amountMap.get(key);
@@ -130,6 +122,19 @@ public class Offer {
             val.add(amountMap.get(key));
         }
         return new Offer(id, name, createdAt, price, validityDay, limitation, val);
+    }
+    
+    public void retreive(Amount amount) throws Exception {
+        Amount chosen = null;
+        for (int i = 0; i < amounts.size(); i++) {
+            if (amounts.get(i).equals(amount)) {
+                chosen = amounts.get(i);
+                break;
+            }
+        }
+        double sub = chosen.getValue() - amount.getValue();
+        if (sub < 0) sub = 0;
+        chosen.setValue(sub);
     }
     
     public boolean isSameOfferTypeAs(Offer offer) {

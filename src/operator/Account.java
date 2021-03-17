@@ -18,20 +18,22 @@ public class Account {
     
     private int customerId;
     private List<Purchase> purchases;
-    private List<Offer> offersTotal;
+    private List<Consumption> consumptions;
 
-    public Account(int customerId, List<Purchase> purchases, List<Offer> offersTotal) throws Exception {
+    public Account(int customerId, List<Purchase> purchases, List<Consumption> consumptions) throws Exception {
         setCustomerId(customerId);
         setPurchases(purchases);
-        setOffersTotal(offersTotal);
+        setConsumptions(consumptions);
+    }
+    
+    public List<Consumption> getConsumptions() {
+        return consumptions;
     }
 
-    public List<Offer> getOffersTotal() {
-        return offersTotal;
-    }
-
-    public void setOffersTotal(List<Offer> offersTotal) {
-        this.offersTotal = offersTotal;
+    public void setConsumptions(List<Consumption> consumptions) throws Exception {
+        if (consumptions == null)
+            throw new Exception("consumptions are required");
+        this.consumptions = consumptions;
     }
     
     public int getCustomerId() {
@@ -62,13 +64,63 @@ public class Account {
         return validPurchases;
     }
     
-    public Offer getInfoConsoAt(SmartDate date) throws Exception {
+    public List<Consumption> getValidConsumptionsFromDate(SmartDate date) {
+        List<Consumption> validConsumptions = new ArrayList<>();
+        for (int i = 0; i < consumptions.size(); i++) {
+            if (consumptions.get(i).getDate().after(date)) {
+                validConsumptions.add(consumptions.get(i));
+            }
+        }
+        return validConsumptions;
+    }
+    
+    public Offer getMatchingOfferAt(SmartDate date, Application app) throws Exception {
+        List<Offer> total = getPurchasesTotalAt(date);
+        for (int i = 0; i < total.size(); i++) {
+            for (int j = 0; j < total.get(i).getAmounts().size(); j++) {
+                 if (total.get(i).getAmounts().get(j).getApplication().equals(app)) {
+                    return total.get(i);
+                } 
+            }
+        }
+        return null;
+    }
+    
+    public List<Offer> getPurchasesTotalAt(SmartDate date) throws Exception {
         
         List<Purchase> validPurchases = getValidPurchasesAtDate(date);
-        Offer cumulated = validPurchases.get(0).getOffer().cumulate(validPurchases.get(1).getOffer());
-        for (int i = 2; i < validPurchases.size(); i++) {
-            cumulated = cumulated.cumulate(validPurchases.get(i).getOffer());
+        Map<String, Offer> offersMap = new HashMap<>(); 
+        
+        for (int i = 0; i < validPurchases.size(); i++) {
+            String key = validPurchases.get(i).getOffer().getName();
+            if (!offersMap.containsKey(key)) {
+                Offer offer = validPurchases.get(i).getOffer();
+                ArrayList<Amount> amounts = new ArrayList<>();
+                for (Amount amount : offer.getAmounts()) {
+                    Amount a = new Amount(amount);
+                    a.setValue(0);
+                    amounts.add(a);
+                }
+                Offer newOffer = new Offer(offer.getId(), offer.getName(), offer.getCreatedAt(), offer.getPrice(), offer.getValidityDay(), offer.getLimitation(), amounts);
+                offersMap.put(key, newOffer);
+            }
         }
-        return cumulated;
+        
+        for (Map.Entry mapElement : offersMap.entrySet()) {
+            String key = (String)mapElement.getKey();
+            for (int i = 0; i < validPurchases.size(); i++) {
+                if (validPurchases.get(i).getOffer().getName().equals(key)) {
+                    offersMap.put(key, offersMap.get(key).cumulate(purchases.get(i).getOffer()));
+                }
+            }
+        }
+        
+        List<Offer> val = new ArrayList<>();
+        for (Map.Entry mapElement : offersMap.entrySet()) { 
+            String key = (String)mapElement.getKey();
+            val.add(offersMap.get(key));
+        }
+        
+        return val;
     }
 }

@@ -57,8 +57,8 @@ public class Test {
             baks.purchase(yellow100, SmartDate.now());
             baks.purchase(yellow100, SmartDate.now());
 
-            Offer cumulated = yellow100.cumulate(faceboobaka);
-            System.out.println(cumulated);
+            List<Offer> infoConsoAt = baks.getAccount().getPurchasesTotalAt(SmartDate.now().addDays(1));
+            System.out.println(infoConsoAt);
             
         } catch (Exception e) {
             e.printStackTrace();

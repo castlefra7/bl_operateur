@@ -5,6 +5,8 @@
  */
 package operator;
 
+import java.util.Objects;
+
 /**
  *
  * @author dodaa
@@ -63,8 +65,16 @@ public class Application {
         if (this.id != other.id) {
             return false;
         }
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.unit, other.unit)) {
+            return false;
+        }
         return true;
     }
+
+
 
     @Override
     public String toString() {
